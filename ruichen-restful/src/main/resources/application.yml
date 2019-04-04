@@ -1,33 +1,33 @@
 spring:
   application:
     name: ruichen-restful
-  #Êı¾İÔ´ÅäÖÃ
+  #æ•°æ®æºé…ç½®
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    #    Î´¼¯³Élog4jdbc
+    #    æœªé›†æˆlog4jdbc
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/zif_app?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true
-    username: dev_owner
-    password: ziroomdb
-    # ÏÂÃæÎªÁ¬½Ó³ØµÄ²¹³äÉèÖÃ£¬Ó¦ÓÃµ½ÉÏÃæËùÓĞÊı¾İÔ´ÖĞ
-    # ³õÊ¼»¯´óĞ¡£¬×îĞ¡£¬×î´ó
+    url: jdbc:mysql://rm-2zep31m06l11k2wc2lo.mysql.rds.aliyuncs.com/ruichen?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true
+    username: root
+    password: Ml06200818
+    # ä¸‹é¢ä¸ºè¿æ¥æ± çš„è¡¥å……è®¾ç½®ï¼Œåº”ç”¨åˆ°ä¸Šé¢æ‰€æœ‰æ•°æ®æºä¸­
+    # åˆå§‹åŒ–å¤§å°ï¼Œæœ€å°ï¼Œæœ€å¤§
     druid:
       initial-size: 5
       min-idle: 1
       max-active: 200
-      # ÅäÖÃ»ñÈ¡Á¬½ÓµÈ´ı³¬Ê±µÄÊ±¼ä
-      max-wait: 60000
-      # ÅäÖÃ¼ä¸ô¶à¾Ã²Å½øĞĞÒ»´Î¼ì²â£¬¼ì²âĞèÒª¹Ø±ÕµÄ¿ÕÏĞÁ¬½Ó£¬µ¥Î»ÊÇºÁÃë
+      # é…ç½®è·å–è¿æ¥ç­‰å¾…è¶…æ—¶çš„æ—¶é—´
+      max-wait: 1000
+      # é…ç½®é—´éš”å¤šä¹…æ‰è¿›è¡Œä¸€æ¬¡æ£€æµ‹ï¼Œæ£€æµ‹éœ€è¦å…³é—­çš„ç©ºé—²è¿æ¥ï¼Œå•ä½æ˜¯æ¯«ç§’
       time-between-eviction-runs-millis: 60000
-      # ÅäÖÃÒ»¸öÁ¬½ÓÔÚ³ØÖĞ×îĞ¡Éú´æµÄÊ±¼ä£¬µ¥Î»ÊÇºÁÃë
-      min-evictable-idle-time-millis: 300000
+      # é…ç½®ä¸€ä¸ªè¿æ¥åœ¨æ± ä¸­æœ€å°ç”Ÿå­˜çš„æ—¶é—´ï¼Œå•ä½æ˜¯æ¯«ç§’
+      min-evictable-idle-time-millis: 60000
       validation-query: SELECT 1 FROM DUAL
       test-while-idle: true
       test-on-borrow: false
       test-on-return: false
-      # ´ò¿ªPSCache£¬²¢ÇÒÖ¸¶¨Ã¿¸öÁ¬½ÓÉÏPSCacheµÄ´óĞ¡
+      # æ‰“å¼€PSCacheï¼Œå¹¶ä¸”æŒ‡å®šæ¯ä¸ªè¿æ¥ä¸ŠPSCacheçš„å¤§å°
       pool-prepared-statements: false
-      # ÅäÖÃ¼à¿ØÍ³¼ÆÀ¹½ØµÄfilters£¬È¥µôºó¼à¿Ø½çÃæsqlÎŞ·¨Í³¼Æ£¬'wall'ÓÃÓÚ·À»ğÇ½
+      # é…ç½®ç›‘æ§ç»Ÿè®¡æ‹¦æˆªçš„filtersï¼Œå»æ‰åç›‘æ§ç•Œé¢sqlæ— æ³•ç»Ÿè®¡ï¼Œ'wall'ç”¨äºé˜²ç«å¢™
       filters: stat,slf4j
       filter:
         stat:
@@ -38,19 +38,33 @@ spring:
           statement-executable-sql-log-enable: true
           statement-execute-after-log-enabled: true
           statement-log-error-enabled: true
-      #¼à¿ØÒ³Ãæ
+      #ç›‘æ§é¡µé¢
       stat-view-servlet:
-        #¿ªÆô/¹Ø±Õ
+        #å¼€å¯/å…³é—­
         enabled: true
-        #µÇÂ¼ÕËºÅºÍÃÜÂë
+        #ç™»å½•è´¦å·å’Œå¯†ç 
         login-username: admin
-        login-password: 123456
-        #ÊÇ·ñÄÜ¹»ÖØÖÃÊı¾İ
+        login-password: Ml06200818
+        #æ˜¯å¦èƒ½å¤Ÿé‡ç½®æ•°æ®
         reset-enable: false
-        #°×Ãûµ¥
-        allow: 192.168.1-255
-        #IPºÚÃûµ¥ (´æÔÚ¹²Í¬Ê±£¬denyÓÅÏÈÓÚallow) : Èç¹ûÂú×ãdenyµÄ»°ÌáÊ¾:Sorry, you are not permitted to view this page.
+        #ç™½åå•
+        allow: 36.110.36.1-255
+        #IPé»‘åå• (å­˜åœ¨å…±åŒæ—¶ï¼Œdenyä¼˜å…ˆäºallow) : å¦‚æœæ»¡è¶³denyçš„è¯æç¤º:Sorry, you are not permitted to view this page.
         deny: 127.0.0.2
       web-stat-filter:
-        #Ìí¼Ó²»ĞèÒªºöÂÔµÄ¸ñÊ½ĞÅÏ¢
+        #æ·»åŠ ä¸éœ€è¦å¿½ç•¥çš„æ ¼å¼ä¿¡æ¯
         exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
+  #redisé…ç½®
+  redis:
+    host: 39.97.185.174
+    port: 6379
+    password: Ml06200818
+    database: 1
+    jedis:
+      pool:
+        #æœ€å¤§ç©ºé—²æ•°ï¼Œæ•°æ®åº“è¿æ¥çš„æœ€å¤§ç©ºé—²æ—¶é—´ã€‚è¶…è¿‡ç©ºé—²æ—¶é—´ï¼Œæ•°æ®åº“è¿æ¥å°†è¢«æ ‡è®°ä¸ºä¸å¯ç”¨ï¼Œç„¶åè¢«é‡Šæ”¾ã€‚è®¾ä¸º0è¡¨ç¤ºæ— é™åˆ¶ã€‚
+        max-idle: 300
+        #è¿æ¥æ± çš„æœ€å¤§æ•°æ®åº“è¿æ¥æ•°ã€‚è®¾ä¸º0è¡¨ç¤ºæ— é™åˆ¶ã€‚
+        max-active: 50
+        #æœ€å¤§å»ºç«‹è¿æ¥ç­‰å¾…æ—¶é—´ã€‚å¦‚æœè¶…è¿‡æ­¤æ—¶é—´å°†æ¥åˆ°å¼‚å¸¸ã€‚è®¾ä¸º-1è¡¨ç¤ºæ— é™åˆ¶ã€‚
+        max-wait: 1000

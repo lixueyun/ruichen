@@ -1,1 +1,70 @@
-
+spring:
+  application:
+    name: ruichen-restful
+  #数据源配置
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    #    未集成log4jdbc
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://rm-2zep31m06l11k2wc2lo.mysql.rds.aliyuncs.com/ruichen?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true
+    username: root
+    password: Ml06200818
+    # 下面为连接池的补充设置，应用到上面所有数据源中
+    # 初始化大小，最小，最大
+    druid:
+      initial-size: 5
+      min-idle: 1
+      max-active: 200
+      # 配置获取连接等待超时的时间
+      max-wait: 1000
+      # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      time-between-eviction-runs-millis: 60000
+      # 配置一个连接在池中最小生存的时间，单位是毫秒
+      min-evictable-idle-time-millis: 60000
+      validation-query: SELECT 1 FROM DUAL
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      # 打开PSCache，并且指定每个连接上PSCache的大小
+      pool-prepared-statements: false
+      # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+      filters: stat,slf4j
+      filter:
+        stat:
+          merge-sql: true
+          log-slow-sql: true
+          slow-sql-millis: 2000
+        slf4j:
+          statement-executable-sql-log-enable: true
+          statement-execute-after-log-enabled: true
+          statement-log-error-enabled: true
+      #监控页面
+      stat-view-servlet:
+        #开启/关闭
+        enabled: true
+        #登录账号和密码
+        login-username: admin
+        login-password: Ml06200818
+        #是否能够重置数据
+        reset-enable: false
+        #白名单
+        allow: 36.110.36.1-255
+        #IP黑名单 (存在共同时，deny优先于allow) : 如果满足deny的话提示:Sorry, you are not permitted to view this page.
+        deny: 127.0.0.2
+      web-stat-filter:
+        #添加不需要忽略的格式信息
+        exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
+  #redis配置
+  redis:
+    host: 39.97.185.174
+    port: 6379
+    password: Ml06200818
+    database: 1
+    jedis:
+      pool:
+        #最大空闲数，数据库连接的最大空闲时间。超过空闲时间，数据库连接将被标记为不可用，然后被释放。设为0表示无限制。
+        max-idle: 300
+        #连接池的最大数据库连接数。设为0表示无限制。
+        max-active: 50
+        #最大建立连接等待时间。如果超过此时间将接到异常。设为-1表示无限制。
+        max-wait: 1000
