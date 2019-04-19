@@ -7,7 +7,6 @@ spring:
     name: ruichen-restful
   #thymeleaf模板
   thymeleaf:
-    prefix: classpath: /
     suffix: .html
     mode: HTML5
     encoding: utf-8
