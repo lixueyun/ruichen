@@ -1,10 +1,19 @@
+server:
+  port: 80
 spring:
   application:
     name: ruichen-restful
+  #spring mvc配置
+  mvc:
+    view:
+      prefix: /
+  #thymeleaf模板
+  thymeleaf:
+    mode: HTML5
   #数据源配置
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    # 未集成log4jdbc
+    #    未集成log4jdbc
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://rm-2zep31m06l11k2wc2lo.mysql.rds.aliyuncs.com/ruichen?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true
     username: root
@@ -48,9 +57,9 @@ spring:
         #是否能够重置数据
         reset-enable: false
         #白名单
-        allow: 36.110.36.1-255
+#        allow: 36.110.36.1-255
         #IP黑名单 (存在共同时，deny优先于allow) : 如果满足deny的话提示:Sorry, you are not permitted to view this page.
-        deny: 127.0.0.2
+#        deny: 127.0.0.2
       web-stat-filter:
         #添加不需要忽略的格式信息
         exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
@@ -68,3 +77,7 @@ spring:
         max-active: 50
         #最大建立连接等待时间。如果超过此时间将接到异常。设为-1表示无限制。
         max-wait: 1000
+
+swagger:
+  enabled: true
+  base-package: com.ruichen.restful.controller

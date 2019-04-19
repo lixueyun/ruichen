@@ -1,6 +1,19 @@
+server:
+  port: 80
 spring:
+  profiles:
+    active: @profileActive@
   application:
     name: ruichen-restful
+  #thymeleaf模板
+  thymeleaf:
+    prefix: classpath: /
+    suffix: .html
+    mode: HTML5
+    encoding: utf-8
+    cache: false
+    servlet:
+      content-type: text/html
   #数据源配置
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
@@ -48,9 +61,9 @@ spring:
         #是否能够重置数据
         reset-enable: false
         #白名单
-        allow: 36.110.36.1-255
+#        allow: 36.110.36.1-255
         #IP黑名单 (存在共同时，deny优先于allow) : 如果满足deny的话提示:Sorry, you are not permitted to view this page.
-        deny: 127.0.0.2
+#        deny: 127.0.0.2
       web-stat-filter:
         #添加不需要忽略的格式信息
         exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
@@ -68,3 +81,7 @@ spring:
         max-active: 50
         #最大建立连接等待时间。如果超过此时间将接到异常。设为-1表示无限制。
         max-wait: 1000
+
+swagger:
+  enabled: true
+  base-package: com.ruichen.restful.controller
