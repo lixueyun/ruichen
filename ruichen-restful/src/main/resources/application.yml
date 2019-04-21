@@ -1,24 +1,21 @@
 server:
   port: 80
 spring:
-  profiles:
-    active: @profileActive@
   application:
     name: ruichen-restful
+  #spring mvc配置
+  mvc:
+    view:
+      prefix: /
   #thymeleaf模板
   thymeleaf:
-    suffix: .html
-    mode: HTML5
-    encoding: utf-8
-    cache: false
-    servlet:
-      content-type: text/html
+    mode: HTML
   #数据源配置
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     #    未集成log4jdbc
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://rm-2zep31m06l11k2wc2lo.mysql.rds.aliyuncs.com/ruichen?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://rm-2zep31m06l11k2wc2lo.mysql.rds.aliyuncs.com/ruichen?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&useSSL=false&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true
     username: root
     password: Ml06200818
     # 下面为连接池的补充设置，应用到上面所有数据源中
@@ -80,6 +77,29 @@ spring:
         max-active: 50
         #最大建立连接等待时间。如果超过此时间将接到异常。设为-1表示无限制。
         max-wait: 1000
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/*.xml
+  #实体扫描，多个package用逗号或者分号分隔
+  type-aliases-package: com.ruichen.restful.repository.mybatis.entity
+  #自定义枚举包
+  type-enums-package: com.ruichen.restful.common.enums
+  global-config:
+    db-config:
+      #主键类型  AUTO:"数据库ID自增", INPUT:"用户输入ID",ID_WORKER:"全局唯一ID (数字类型唯一ID)", UUID:"全局唯一ID UUID";
+      id-type: AUTO
+      #字段策略 IGNORED:"忽略判断",NOT_NULL:"非 NULL 判断"),NOT_EMPTY:"非空判断"
+      field-strategy: NOT_EMPTY
+      #驼峰下划线转换
+      db-column-underline: true
+      #逻辑删除配置（下面3个配置）
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+    #刷新mapper 调试神器
+    refresh: true
+  configuration:
+    #true表示开启驼峰转换
+    map-underscore-to-camel-case: true
+    cache-enabled: false
 
 swagger:
   enabled: true

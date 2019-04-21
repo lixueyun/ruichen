@@ -22,7 +22,7 @@ public class LoginController {
      * @return  java.lang.String
      */
     @RequestMapping("/")
-    public String index(){
-        return "index";
+    public String login(){
+        return "login";
     }
 }
