@@ -1,14 +1,19 @@
 package com.ruichen.restful.config.shiro;
 
+import com.ruichen.restful.common.constants.ShiroConstants;
+import com.ruichen.restful.config.shiro.cache.ShiroRedisCacheManager;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
-import org.apache.shiro.cache.CacheManager;
+import org.apache.shiro.codec.Base64;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.session.mgt.SessionManager;
+import org.apache.shiro.session.mgt.eis.EnterpriseCacheSessionDAO;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.CookieRememberMeManager;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.apache.shiro.web.servlet.SimpleCookie;
+import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -30,24 +35,96 @@ import java.util.Map;
 public class ShiroConfig {
 
 	@Autowired
-	private UserRealm userRealm;
+	private ShiroRedisCacheManager shiroRedisCacheManager;
+
+
+	/**
+	 * @methodName  hashedCredentialsMatcher
+	 * @description 凭证匹配器
+	 * （由于我们的密码校验交给Shiro的SimpleAuthenticationInfo进行处理了所以我们需要修改下doGetAuthenticationInfo中的代码;）
+	 * 可以扩展凭证匹配器，实现 输入密码错误次数后锁定等功能，下一次
+	 * @param
+	 * @author  lixueyun
+	 * @Date  2019/4/19 22:26
+	 * @return  org.apache.shiro.authc.credential.HashedCredentialsMatcher
+	 */
+	@Bean(name = "credentialsMatcher")
+	public HashedCredentialsMatcher hashedCredentialsMatcher() {
+		HashedCredentialsMatcher hashedCredentialsMatcher = new HashedCredentialsMatcher();
+		//散列算法:这里使用MD5算法;
+		hashedCredentialsMatcher.setHashAlgorithmName(ShiroConstants.HASH_ALGORITHM_NAME);
+		//散列的次数，比如散列两次，相当于 md5(md5(""));
+		hashedCredentialsMatcher.setHashIterations(ShiroConstants.HASH_ITERATIONS);
+		//storedCredentialsHexEncoded默认是true，此时用的是密码加密用的是Hex编码；false时用Base64编码
+		hashedCredentialsMatcher.setStoredCredentialsHexEncoded(true);
+		return hashedCredentialsMatcher;
+	}
+
+	@Bean
+	public SimpleCookie rememberMeCookie() {
+		// 这里的Cookie的默认名称是 CookieRememberMeManager.DEFAULT_REMEMBER_ME_COOKIE_NAME
+		SimpleCookie cookie = new SimpleCookie(CookieRememberMeManager.DEFAULT_REMEMBER_ME_COOKIE_NAME);
+		// 是否只在https情况下传输
+		cookie.setSecure(false);
+		// 设置 cookie 的过期时间，单位为秒，这里为30天
+		cookie.setMaxAge(2592000);
+		return cookie;
+	}
+
+	/**
+	 * @methodName  rememberMeManager
+	 * @description  rememberMe管理器	cipherKey生成见{@code Base64Test.java}
+	 * @param rememberMeCookie
+	 * @author  lixueyun
+	 * @Date  2019/5/30 20:13
+	 * @return  org.apache.shiro.web.mgt.CookieRememberMeManager
+	 */
+	@Bean
+	public CookieRememberMeManager rememberMeManager(SimpleCookie rememberMeCookie) {
+		CookieRememberMeManager manager = new CookieRememberMeManager();
+		manager.setCipherKey(Base64.decode("cnVpY2hlbgAAAAAAAAAAAA=="));
+		manager.setCookie(rememberMeCookie);
+		return manager;
+	}
+
+	/**
+	 * @methodName  sessionManager
+	 * @description  session 管理对象
+	 * @param
+	 * @author  lixueyun
+	 * @Date  2019/5/30 22:48
+	 * @return  org.apache.shiro.web.session.mgt.DefaultWebSessionManager
+	 */
+	@Bean(name = "sessionManager")
+	public DefaultWebSessionManager sessionManager(SimpleCookie rememberMeCookie) {
+		DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
+		// 设置session超时时间，单位为毫秒
+		sessionManager.setGlobalSessionTimeout(1800000);
+		sessionManager.setSessionIdCookie(rememberMeCookie);
+		// 网上各种说要自定义sessionDAO 其实完全不必要，shiro自己就自定义了一个，可以直接使用，还有其他的DAO，自行查看源码即可
+		sessionManager.setSessionDAO(new EnterpriseCacheSessionDAO());
+		return sessionManager;
+	}
 
 	/**
 	 * @methodName  securityManager
-	 * @description  securityManager
+	 * @description	配置各种manager,跟xml的配置很像，但是，这里有一个细节，就是各个set的次序不能乱
 	 * @param
 	 * @author  lixueyun
 	 * @Date  2019/4/19 22:25
 	 * @return  org.apache.shiro.mgt.SecurityManager
 	 */
 	@Bean
-	public SecurityManager securityManager(CookieRememberMeManager rememberMeManager, CacheManager cacheShiroManager, SessionManager sessionManager) {
+	@DependsOn("userRealm")
+	public SecurityManager securityManager(CookieRememberMeManager rememberMeManager, SessionManager sessionManager, UserRealm userRealm) {
 		DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
-		securityManager.setRealm(userRealm);
-		//缓存
-		securityManager.setCacheManager(cacheShiroManager);
-		//记住密码
+		// 记住密码 查看源码可以知道，这里的rememberMeManager就仅仅是一个赋值，所以先执行
 		securityManager.setRememberMeManager(rememberMeManager);
+		//配置 缓存管理类 cacheManager，这个cacheManager必须要在前面执行，
+		// 因为setRealm 和 setSessionManage都有方法初始化了cachemanager,看下源码就知道了
+		securityManager.setCacheManager(shiroRedisCacheManager);
+		// 配置 SecurityManager，并注入 shiroRealm 这个跟springmvc集成很像
+		securityManager.setRealm(userRealm);
 		//session管理
 		securityManager.setSessionManager(sessionManager);
 		return securityManager;
@@ -72,10 +149,10 @@ public class ShiroConfig {
 		shiroFilterFactoryBean.setSuccessUrl("/index");
 		//没有权限跳转的url
 		shiroFilterFactoryBean.setUnauthorizedUrl("/403");
-		Map<String, Filter> filterMap = new LinkedHashMap<>();
+//		Map<String, Filter> filterMap = new LinkedHashMap<>();
 		//shiro有一些默认的拦截器 比如authc，它就是FormAuthenticationFilter表单拦截器 可以自定义拦截器放在这
 		//filterMap.put("authc", new AjaxPermissionsAuthorizationFilter());
-		shiroFilterFactoryBean.setFilters(filterMap);
+//		shiroFilterFactoryBean.setFilters(filterMap);
 		/*定义shiro过滤链  Map结构
 		 * Map中key(xml中是指value值)的第一个'/'代表的路径是相对于HttpServletRequest.getContextPath()的值来的
 		 * anon：它对应的过滤器里面是空的,什么都没做,这里.do和.jsp后面的*表示参数,比方说login.jsp?main这种
@@ -91,28 +168,6 @@ public class ShiroConfig {
 		filterChainDefinitionMap.put("/**", "authc");
 		shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
 		return shiroFilterFactoryBean;
-	}
-
-	/**
-	 * @methodName  hashedCredentialsMatcher
-	 * @description 凭证匹配器
-	 * （由于我们的密码校验交给Shiro的SimpleAuthenticationInfo进行处理了所以我们需要修改下doGetAuthenticationInfo中的代码;）
-	 * 可以扩展凭证匹配器，实现 输入密码错误次数后锁定等功能，下一次
-	 * @param
-	 * @author  lixueyun
-	 * @Date  2019/4/19 22:26
-	 * @return  org.apache.shiro.authc.credential.HashedCredentialsMatcher
-	 */
-	@Bean(name = "credentialsMatcher")
-	public HashedCredentialsMatcher hashedCredentialsMatcher() {
-		HashedCredentialsMatcher hashedCredentialsMatcher = new HashedCredentialsMatcher();
-		//散列算法:这里使用MD5算法;
-		hashedCredentialsMatcher.setHashAlgorithmName("md5");
-		//散列的次数，比如散列两次，相当于 md5(md5(""));
-		hashedCredentialsMatcher.setHashIterations(2);
-		//storedCredentialsHexEncoded默认是true，此时用的是密码加密用的是Hex编码；false时用Base64编码
-		hashedCredentialsMatcher.setStoredCredentialsHexEncoded(true);
-		return hashedCredentialsMatcher;
 	}
 
 	/**

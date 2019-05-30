@@ -1,6 +1,5 @@
 package com.ruichen.restful.config.shiro;
 
-import com.ruichen.restful.common.constants.ShiroConstants;
 import com.ruichen.restful.config.shiro.service.IUserAuthService;
 import com.ruichen.restful.repository.mybatis.entity.UserEntity;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +8,6 @@ import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
-import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
@@ -81,9 +79,6 @@ public class UserRealm extends AuthorizingRealm {
      */
     @Override
     public void setCredentialsMatcher(CredentialsMatcher credentialsMatcher) {
-        HashedCredentialsMatcher md5CredentialsMatcher = new HashedCredentialsMatcher();
-        md5CredentialsMatcher.setHashAlgorithmName(ShiroConstants.HASH_ALGORITHM_NAME);
-        md5CredentialsMatcher.setHashIterations(ShiroConstants.HASH_ITERATIONS);
-        super.setCredentialsMatcher(md5CredentialsMatcher);
+        super.setCredentialsMatcher(credentialsMatcher);
     }
 }
