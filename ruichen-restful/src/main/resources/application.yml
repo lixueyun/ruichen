@@ -15,7 +15,7 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     #    未集成log4jdbc
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://rm-2zep31m06l11k2wc2lo.mysql.rds.aliyuncs.com/ruichen?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&useSSL=false&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true
+    url: jdbc:mysql://118.187.7.86/ruichen?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&useSSL=false&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true
     username: root
     password: Ml06200818
     # 下面为连接池的补充设置，应用到上面所有数据源中
@@ -65,7 +65,7 @@ spring:
         exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
   #redis配置
   redis:
-    host: 39.97.185.174
+    host: 118.187.7.86
     port: 6379
     password: Ml06200818
     database: 1
