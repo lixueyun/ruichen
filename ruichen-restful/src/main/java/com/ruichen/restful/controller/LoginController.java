@@ -2,6 +2,7 @@ package com.ruichen.restful.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * @ClassName  LoginController
@@ -21,7 +22,7 @@ public class LoginController {
      * @Date  2019/4/19 17:20
      * @return  java.lang.String
      */
-    @RequestMapping("/")
+    @RequestMapping(value = {"/","/login"}, method = RequestMethod.GET)
     public String login(){
         return "login";
     }

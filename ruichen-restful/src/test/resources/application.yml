@@ -65,7 +65,7 @@ spring:
         exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
   #redis配置
   redis:
-    host: 118.187.7.86
+    host: 118.187.5.138
     port: 6379
     password: Ml06200818
     database: 1

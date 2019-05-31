@@ -1,17 +1,16 @@
 package com.ruichen.restful.config.shiro;
 
-import com.ruichen.restful.common.constants.ShiroConstants;
 import com.ruichen.restful.config.shiro.cache.ShiroRedisCacheManager;
-import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.codec.Base64;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.session.mgt.SessionManager;
-import org.apache.shiro.session.mgt.eis.EnterpriseCacheSessionDAO;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.CookieRememberMeManager;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.apache.shiro.web.servlet.Cookie;
+import org.apache.shiro.web.servlet.ShiroHttpSession;
 import org.apache.shiro.web.servlet.SimpleCookie;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
@@ -20,7 +19,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
-import javax.servlet.Filter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -34,40 +32,18 @@ import java.util.Map;
 @Configuration
 public class ShiroConfig {
 
+
 	@Autowired
 	private ShiroRedisCacheManager shiroRedisCacheManager;
 
 
-	/**
-	 * @methodName  hashedCredentialsMatcher
-	 * @description 凭证匹配器
-	 * （由于我们的密码校验交给Shiro的SimpleAuthenticationInfo进行处理了所以我们需要修改下doGetAuthenticationInfo中的代码;）
-	 * 可以扩展凭证匹配器，实现 输入密码错误次数后锁定等功能，下一次
-	 * @param
-	 * @author  lixueyun
-	 * @Date  2019/4/19 22:26
-	 * @return  org.apache.shiro.authc.credential.HashedCredentialsMatcher
-	 */
-	@Bean(name = "credentialsMatcher")
-	public HashedCredentialsMatcher hashedCredentialsMatcher() {
-		HashedCredentialsMatcher hashedCredentialsMatcher = new HashedCredentialsMatcher();
-		//散列算法:这里使用MD5算法;
-		hashedCredentialsMatcher.setHashAlgorithmName(ShiroConstants.HASH_ALGORITHM_NAME);
-		//散列的次数，比如散列两次，相当于 md5(md5(""));
-		hashedCredentialsMatcher.setHashIterations(ShiroConstants.HASH_ITERATIONS);
-		//storedCredentialsHexEncoded默认是true，此时用的是密码加密用的是Hex编码；false时用Base64编码
-		hashedCredentialsMatcher.setStoredCredentialsHexEncoded(true);
-		return hashedCredentialsMatcher;
-	}
-
-	@Bean
+	@Bean(name = "rememberMeCookie")
 	public SimpleCookie rememberMeCookie() {
 		// 这里的Cookie的默认名称是 CookieRememberMeManager.DEFAULT_REMEMBER_ME_COOKIE_NAME
 		SimpleCookie cookie = new SimpleCookie(CookieRememberMeManager.DEFAULT_REMEMBER_ME_COOKIE_NAME);
-		// 是否只在https情况下传输
-		cookie.setSecure(false);
-		// 设置 cookie 的过期时间，单位为秒，这里为30天
-		cookie.setMaxAge(2592000);
+		cookie.setHttpOnly(true);
+		// 设置 cookie 的过期时间，单位为秒，这里为7天
+		cookie.setMaxAge(7 * 24 * 60 * 60);
 		return cookie;
 	}
 
@@ -79,7 +55,7 @@ public class ShiroConfig {
 	 * @Date  2019/5/30 20:13
 	 * @return  org.apache.shiro.web.mgt.CookieRememberMeManager
 	 */
-	@Bean
+	@Bean(name = "rememberMeManager")
 	public CookieRememberMeManager rememberMeManager(SimpleCookie rememberMeCookie) {
 		CookieRememberMeManager manager = new CookieRememberMeManager();
 		manager.setCipherKey(Base64.decode("cnVpY2hlbgAAAAAAAAAAAA=="));
@@ -96,13 +72,18 @@ public class ShiroConfig {
 	 * @return  org.apache.shiro.web.session.mgt.DefaultWebSessionManager
 	 */
 	@Bean(name = "sessionManager")
-	public DefaultWebSessionManager sessionManager(SimpleCookie rememberMeCookie) {
+	public DefaultWebSessionManager sessionManager() {
 		DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
-		// 设置session超时时间，单位为毫秒
-		sessionManager.setGlobalSessionTimeout(1800000);
-		sessionManager.setSessionIdCookie(rememberMeCookie);
-		// 网上各种说要自定义sessionDAO 其实完全不必要，shiro自己就自定义了一个，可以直接使用，还有其他的DAO，自行查看源码即可
-		sessionManager.setSessionDAO(new EnterpriseCacheSessionDAO());
+		sessionManager.setCacheManager(shiroRedisCacheManager);
+		// session 验证失效时间（默认为15分钟 单位：秒）
+		sessionManager.setSessionValidationInterval(15 * 60 * 1000);
+     	// session 失效时间（默认为30分钟 单位：秒）
+		sessionManager.setGlobalSessionTimeout(30 * 60 * 1000);
+
+		Cookie cookie = new SimpleCookie(ShiroHttpSession.DEFAULT_SESSION_ID_NAME);
+		cookie.setName("shiroCookie");
+		cookie.setHttpOnly(true);
+		sessionManager.setSessionIdCookie(cookie);
 		return sessionManager;
 	}
 
@@ -114,7 +95,7 @@ public class ShiroConfig {
 	 * @Date  2019/4/19 22:25
 	 * @return  org.apache.shiro.mgt.SecurityManager
 	 */
-	@Bean
+	@Bean(name = "securityManager")
 	@DependsOn("userRealm")
 	public SecurityManager securityManager(CookieRememberMeManager rememberMeManager, SessionManager sessionManager, UserRealm userRealm) {
 		DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
@@ -150,9 +131,12 @@ public class ShiroConfig {
 		//没有权限跳转的url
 		shiroFilterFactoryBean.setUnauthorizedUrl("/403");
 //		Map<String, Filter> filterMap = new LinkedHashMap<>();
-		//shiro有一些默认的拦截器 比如authc，它就是FormAuthenticationFilter表单拦截器 可以自定义拦截器放在这
-		//filterMap.put("authc", new AjaxPermissionsAuthorizationFilter());
+		// shiro有一些默认的拦截器 比如authc，它就是FormAuthenticationFilter表单拦截器 可以自定义拦截器放在这
+		// filterMap.put("authc", new AjaxPermissionsAuthorizationFilter());
+		//覆盖默认的user拦截器(默认拦截器解决不了ajax请求 session超时的问题)
+		//filterMap.put("user", new GunsUserFilter());
 //		shiroFilterFactoryBean.setFilters(filterMap);
+
 		/*定义shiro过滤链  Map结构
 		 * Map中key(xml中是指value值)的第一个'/'代表的路径是相对于HttpServletRequest.getContextPath()的值来的
 		 * anon：它对应的过滤器里面是空的,什么都没做,这里.do和.jsp后面的*表示参数,比方说login.jsp?main这种
@@ -163,8 +147,17 @@ public class ShiroConfig {
           authc:所有url都必须认证通过才可以访问; anon:所有url都都可以匿名访问 */
 		filterChainDefinitionMap.put("/", "anon");
 		filterChainDefinitionMap.put("/static/**", "anon");
-		filterChainDefinitionMap.put("/login/logout", "anon");
-		filterChainDefinitionMap.put("/error", "anon");
+		filterChainDefinitionMap.put("/swagger-ui.html", "anon");
+		filterChainDefinitionMap.put("/swagger-resources/**", "anon");
+		filterChainDefinitionMap.put("/v2/api-docs/**", "anon");
+		filterChainDefinitionMap.put("/webjars/springfox-swagger-ui/**", "anon");
+		filterChainDefinitionMap.put("/configuration/security", "anon");
+		filterChainDefinitionMap.put("/configuration/ui", "anon");
+		filterChainDefinitionMap.put("/webjars/**", "anon");
+		filterChainDefinitionMap.put("/doc.html", "anon");
+		filterChainDefinitionMap.put("/druid/**", "anon");
+		filterChainDefinitionMap.put("/login", "anon");
+		filterChainDefinitionMap.put("/logout", "logout");
 		filterChainDefinitionMap.put("/**", "authc");
 		shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
 		return shiroFilterFactoryBean;
@@ -173,6 +166,8 @@ public class ShiroConfig {
 	/**
 	 * @methodName  lifecycleBeanPostProcessor
 	 * @description  Shiro生命周期处理器
+	 * 用于在实现了Initializable接口的Shiro bean初始化时调用Initializable接口回调(例如:UserRealm)
+	 * 在实现了Destroyable接口的Shiro bean销毁时调用 Destroyable接口回调(例如:DefaultSecurityManager)
 	 * @param
 	 * @author  lixueyun
 	 * @Date  2019/4/19 22:27
@@ -201,6 +196,14 @@ public class ShiroConfig {
 		return advisorAutoProxyCreator;
 	}
 
+	/**
+	 * @methodName  authorizationAttributeSourceAdvisor
+	 * @description 启用shrio授权注解拦截方式，AOP式方法级权限检查
+	 * @param securityManager
+	 * @author  lixueyun
+	 * @Date  2019/5/31 9:20
+	 * @return  org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor
+	 */
 	@Bean
 	public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager) {
 		AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor = new AuthorizationAttributeSourceAdvisor();

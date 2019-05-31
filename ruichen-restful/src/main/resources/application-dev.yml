@@ -57,15 +57,15 @@ spring:
         #是否能够重置数据
         reset-enable: false
         #白名单
-#        allow: 36.110.36.1-255
+        #        allow: 36.110.36.1-255
         #IP黑名单 (存在共同时，deny优先于allow) : 如果满足deny的话提示:Sorry, you are not permitted to view this page.
-#        deny: 127.0.0.2
+      #        deny: 127.0.0.2
       web-stat-filter:
         #添加不需要忽略的格式信息
         exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
   #redis配置
   redis:
-    host: 118.187.7.86
+    host: 118.187.5.138
     port: 6379
     password: Ml06200818
     database: 1

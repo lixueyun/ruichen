@@ -27,7 +27,7 @@ public class Base64Test {
         byte[] keys;
         try {
             keys = keyStr.getBytes("UTF-8");
-            System.out.println(Base64Utils.encodeToString(Arrays.copyOf(keys, 16)));
+            System.out.println(Base64Utils.encodeToString(Arrays.copyOf(keys, 64)));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
