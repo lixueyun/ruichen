@@ -10,6 +10,8 @@ spring:
   #thymeleaf模板
   thymeleaf:
     mode: HTML
+    cache: false
+
   #数据源配置
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
@@ -65,7 +67,7 @@ spring:
         exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
   #redis配置
   redis:
-    host: 118.187.5.138
+    host: 118.187.7.86
     port: 6379
     password: Ml06200818
     database: 1

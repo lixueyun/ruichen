@@ -29,7 +29,7 @@ public interface IUserAuthService {
      * @param user
      * @author  lixueyun
      * @Date  2019/4/20 21:16
-     * @return  com.ruichen.restful.config.shiro.ShiroUser
+     * @return  com.ruichen.restful.properties.shiro.ShiroUser
      */
     ShiroUser shiroUser(UserEntity user);
 

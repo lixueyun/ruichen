@@ -15,6 +15,7 @@ import org.apache.shiro.web.servlet.SimpleCookie;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -31,6 +32,55 @@ import java.util.Map;
  */
 @Configuration
 public class ShiroConfig {
+
+	// Session超时时间，单位为毫秒（默认30分钟）
+	@Value("${shiro.session.expireTime}")
+	private int expireTime;
+
+	// 相隔多久检查一次session的有效性，单位毫秒，默认就是10分钟
+	@Value("${shiro.session.validationInterval}")
+	private int validationInterval;
+
+	// 同一个用户最大会话数
+	@Value("${shiro.session.maxSession}")
+	private int maxSession;
+
+	// 踢出之前登录的/之后登录的用户，默认踢出之前登录的用户
+	@Value("${shiro.session.kickoutAfter}")
+	private boolean kickoutAfter;
+
+	// 验证码开关
+	@Value("${shiro.user.captchaEnabled}")
+	private boolean captchaEnabled;
+
+	// 验证码类型
+	@Value("${shiro.user.captchaType}")
+	private String captchaType;
+
+	// 设置Cookie的域名
+	@Value("${shiro.cookie.domain}")
+	private String domain;
+
+	// 设置cookie的有效访问路径
+	@Value("${shiro.cookie.path}")
+	private String path;
+
+	// 设置HttpOnly属性
+	@Value("${shiro.cookie.httpOnly}")
+	private boolean httpOnly;
+
+	// 设置Cookie的过期时间，秒为单位
+	@Value("${shiro.cookie.maxAge}")
+	private int maxAge;
+
+	// 登录地址
+	@Value("${shiro.user.loginUrl}")
+	private String loginUrl;
+
+	// 权限认证失败地址
+	@Value("${shiro.user.unauthorizedUrl}")
+	private String unauthorizedUrl;
+
 
 
 	@Autowired
@@ -146,7 +196,7 @@ public class ShiroConfig {
          /* 过滤链定义，从上向下顺序执行，一般将 / ** 放在最为下边:这是一个坑呢，一不小心代码就不好使了;
           authc:所有url都必须认证通过才可以访问; anon:所有url都都可以匿名访问 */
 		filterChainDefinitionMap.put("/", "anon");
-		filterChainDefinitionMap.put("/static/**", "anon");
+		filterChainDefinitionMap.put("/statics/**", "anon");
 		filterChainDefinitionMap.put("/swagger-ui.html", "anon");
 		filterChainDefinitionMap.put("/swagger-resources/**", "anon");
 		filterChainDefinitionMap.put("/v2/api-docs/**", "anon");
@@ -157,6 +207,8 @@ public class ShiroConfig {
 		filterChainDefinitionMap.put("/doc.html", "anon");
 		filterChainDefinitionMap.put("/druid/**", "anon");
 		filterChainDefinitionMap.put("/login", "anon");
+		filterChainDefinitionMap.put("/logon", "anon");
+		filterChainDefinitionMap.put("/findPassword", "anon");
 		filterChainDefinitionMap.put("/logout", "logout");
 		filterChainDefinitionMap.put("/**", "authc");
 		shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);

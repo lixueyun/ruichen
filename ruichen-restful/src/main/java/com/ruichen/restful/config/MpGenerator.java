@@ -41,7 +41,7 @@ public class MpGenerator {
         AutoGenerator mpg = new AutoGenerator();
         // 全局配置
         GlobalConfig gc = new GlobalConfig();
-        gc.setOutputDir("D:\\config");// 生成文件的输出目录
+        gc.setOutputDir("D:\\properties");// 生成文件的输出目录
         gc.setAuthor("lxy");// 开发人员
         gc.setOpen(true);// 是否打开输出目录
         gc.setServiceName("%sService");// service 命名方式

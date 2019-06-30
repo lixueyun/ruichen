@@ -56,7 +56,7 @@ public class UserAuthServiceImpl implements IUserAuthService {
      * @param userEntity
      * @author  lixueyun
      * @Date  2019/4/20 21:17
-     * @return  com.ruichen.restful.config.shiro.ShiroUser
+     * @return  com.ruichen.restful.properties.shiro.ShiroUser
      */
     @Override
     public ShiroUser shiroUser(UserEntity userEntity) {
