@@ -1,6 +1,6 @@
 package com.ruichen.restful.config.shiro;
 
-import com.ruichen.restful.common.constants.ShiroConstants;
+import com.ruichen.restful.common.constant.ShiroConstant;
 import com.ruichen.restful.config.shiro.service.IUserAuthService;
 import com.ruichen.restful.repository.mybatis.entity.UserEntity;
 import lombok.extern.slf4j.Slf4j;
@@ -83,9 +83,9 @@ public class UserRealm extends AuthorizingRealm {
     public void setCredentialsMatcher(CredentialsMatcher credentialsMatcher) {
         HashedCredentialsMatcher hashedCredentialsMatcher = new HashedCredentialsMatcher();
         //散列算法:这里使用MD5算法;
-        hashedCredentialsMatcher.setHashAlgorithmName(ShiroConstants.HASH_ALGORITHM_NAME);
+        hashedCredentialsMatcher.setHashAlgorithmName(ShiroConstant.HASH_ALGORITHM_NAME);
         //散列的次数，比如散列两次，相当于 md5(md5(""));
-        hashedCredentialsMatcher.setHashIterations(ShiroConstants.HASH_ITERATIONS);
+        hashedCredentialsMatcher.setHashIterations(ShiroConstant.HASH_ITERATIONS);
         //storedCredentialsHexEncoded默认是true，此时用的是密码加密用的是Hex编码；false时用Base64编码
         hashedCredentialsMatcher.setStoredCredentialsHexEncoded(true);
         super.setCredentialsMatcher(hashedCredentialsMatcher);
