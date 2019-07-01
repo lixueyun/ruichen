@@ -3,13 +3,7 @@ server:
 spring:
   application:
     name: ruichen-restful
-  #spring mvc配置
-  mvc:
-    view:
-      prefix: /
-  #thymeleaf模板
-  thymeleaf:
-    mode: HTML
+
   #数据源配置
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
@@ -65,7 +59,7 @@ spring:
         exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
   #redis配置
   redis:
-    host: 118.187.5.138
+    host: 118.187.7.86
     port: 6379
     password: Ml06200818
     database: 1
@@ -77,6 +71,8 @@ spring:
         max-active: 50
         #最大建立连接等待时间。如果超过此时间将接到异常。设为-1表示无限制。
         max-wait: 1000
+
+#mybatis-plus配置
 mybatis-plus:
   mapper-locations: classpath*:/mapper/*.xml
   #实体扫描，多个package用逗号或者分号分隔
@@ -101,6 +97,7 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     cache-enabled: false
 
+#swagger-ui配置
 swagger:
   enabled: true
   base-package: com.ruichen.restful.controller

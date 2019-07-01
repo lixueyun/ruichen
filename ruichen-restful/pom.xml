@@ -19,10 +19,9 @@
         <spring.boot.druid.version>1.1.10</spring.boot.druid.version>
         <spring.boot.mybatis.plus.version>3.1.0</spring.boot.mybatis.plus.version>
         <commons-lang3.version>3.8</commons-lang3.version>
-        <jackson-databind.version>2.9.6</jackson-databind.version>
         <jedis.version>2.9.0</jedis.version>
         <swagger.version>2.9.2</swagger.version>
-        <swagger-bootstrap-ui.version>1.9.1</swagger-bootstrap-ui.version>
+        <swagger-bootstrap-ui.version>1.9.4</swagger-bootstrap-ui.version>
         <shiro.version>1.4.0</shiro.version>
         <velocity-engine-core.version>2.0</velocity-engine-core.version>
     </properties>
@@ -82,12 +81,7 @@
             <version>${commons-lang3.version}</version>
         </dependency>
         <!-- commons / -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson-databind.version}</version><!--$NO-MVN-MAN-VER$ -->
-            <scope>compile</scope>
-        </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -129,11 +123,7 @@
             <artifactId>swagger-bootstrap-ui</artifactId>
             <version>${swagger-bootstrap-ui.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
+        <!--swagger-ui -->
 
         <dependency>
             <groupId>org.apache.shiro</groupId>
