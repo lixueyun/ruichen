@@ -1,19 +1,14 @@
 package com.ruichen.restful.config.shiro.service.impl;
 
-import com.ruichen.restful.common.enums.UserStatusEnum;
 import com.ruichen.restful.config.shiro.ShiroUser;
 import com.ruichen.restful.config.shiro.service.IUserAuthService;
 import com.ruichen.restful.repository.mybatis.entity.UserEntity;
 import com.ruichen.restful.service.IUserService;
-import org.apache.shiro.authc.CredentialsException;
-import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
 
 /**
  * @ClassName  UserAuthService
@@ -39,14 +34,6 @@ public class UserAuthServiceImpl implements IUserAuthService {
     @Override
     public UserEntity user(String account) {
         UserEntity userEntity = userService.getUserByAccount(account);
-        // 账号不存在
-        if (Objects.isNull(userEntity)) {
-            throw new CredentialsException();
-        }
-        // 账号被冻结
-        if (!userEntity.getStatus().equals(UserStatusEnum.ENABLE)) {
-            throw new LockedAccountException();
-        }
         return userEntity;
     }
 

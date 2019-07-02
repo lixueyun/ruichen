@@ -58,7 +58,7 @@ public class MpGenerator {
 
         // 数据源配置
         DataSourceConfig dsc = new DataSourceConfig();
-        dsc.setUrl("jdbc:mysql://rm-2zep31m06l11k2wc2lo.mysql.rds.aliyuncs.com/ruichen?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true");
+        dsc.setUrl("jdbc:mysql://118.187.7.86/ruichen?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true");
         // dsc.setSchemaName("public"); 数据库 schema name
         dsc.setDriverName("com.mysql.jdbc.Driver");
         dsc.setUsername("root");

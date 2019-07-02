@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -18,7 +19,8 @@ import java.time.LocalDateTime;
  * @version  V1.0
  */
 @Data
-public class BaseEntity <T extends Model> extends Model<T> {
+@EqualsAndHashCode(callSuper = false)
+public abstract class BaseEntity <T extends Model> extends Model<T> {
 
     @TableId(value = "id")
     private Long id;

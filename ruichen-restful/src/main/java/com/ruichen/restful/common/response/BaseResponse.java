@@ -1,8 +1,9 @@
-package com.ruichen.restful.common.vo;
+package com.ruichen.restful.common.response;
 
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 
 /**
  * @ClassName  BaseVo
@@ -11,8 +12,9 @@ import lombok.Data;
  * @author  lixueyun
  */
 @Data
-@Builder
-public class BaseVo<T> {
+@EqualsAndHashCode(callSuper = false)
+@Accessors(chain = true)
+public class BaseResponse<T> {
 
     @ApiModelProperty(value = "成功标识")
     private Boolean status;
@@ -25,4 +27,5 @@ public class BaseVo<T> {
 
     @ApiModelProperty(value = "返回数据")
     private T data;
+
 }

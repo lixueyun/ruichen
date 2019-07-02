@@ -10,6 +10,16 @@ package com.ruichen.restful.common.constant;
 public class ShiroConstant {
 
     /**
+     * 权限token key
+     */
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+
+    /**
+     * 权限token key
+     */
+    public static final String AUTHORIZATION_VALUE = "权限token";
+
+    /**
      * 加盐参数
      */
     public final static String HASH_ALGORITHM_NAME = "MD5";

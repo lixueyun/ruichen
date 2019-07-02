@@ -22,7 +22,7 @@ public class MetaObjectHandlerExtend implements MetaObjectHandler {
         metaObject.setValue("createUser", "admin");
         metaObject.setValue("updateTime", LocalDateTime.now());
         metaObject.setValue("updateUser", "admin");
-        metaObject.setValue("delFlag", 1);
+        metaObject.setValue("delFlag", 0);
     }
 
     @Override

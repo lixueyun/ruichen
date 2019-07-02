@@ -1,12 +1,13 @@
 package com.ruichen.restful.config.shiro.jwt;
 
-import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.ruichen.restful.common.constant.ShiroConstant;
+import com.ruichen.restful.common.enums.ErrorCodeEnum;
 import com.ruichen.restful.common.exception.ShiroSpecialException;
 import com.ruichen.restful.common.utils.JwtUtil;
 import com.ruichen.restful.config.shiro.ShiroProperties;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
 import org.apache.shiro.web.util.WebUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -17,8 +18,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -39,14 +38,11 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
 
     /**
      * @methodName  isAccessAllowed
-     * @description 执行登录认证
-     * 这里我们详细说明下为什么最终返回的都是true，即允许访问
-     * 例如我们提供一个地址 GET /article
-     * 登入用户和游客看到的内容是不同的
-     * 如果在这里返回了false，请求会被直接拦截，用户看不到任何东西
-     * 所以我们在这里返回true，Controller中可以通过 subject.isAuthenticated() 来判断用户是否登入
-     * 如果有些资源只有登入用户才能访问，我们只需要在方法上面加上 @RequiresAuthentication 注解即可
-     * 但是这样做有一个缺点，就是不能够对GET,POST等请求进行分别过滤鉴权(因为我们重写了官方的方法)，但实际上对应用影响不大
+     * @description 先执行：isAccessAllowed 再执行onAccessDenied
+     * isAccessAllowed：表示是否允许访问；mappedValue就是[urls]配置中拦截器参数部分，
+     * 如果允许访问返回true，否则false；
+     * 如果返回true的话，就直接返回交给下一个filter进行处理。
+     * 如果返回false的话，回往下执行onAccessDenied
      * @param request
      * @param response
      * @param mappedValue
@@ -56,70 +52,51 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
      */
     @Override
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
+
         // 查看当前Header中是否携带Authorization属性(Token)，有的话就进行登录认证授权
         if (this.isLoginAttempt(request, response)) {
             try {
                 // 进行Shiro的登录UserRealm
                 this.executeLogin(request, response);
             } catch (Exception e) {
-                // 认证出现异常，传递错误信息msg
-                String msg = e.getMessage();
                 // 获取应用异常(该Cause是导致抛出此throwable(异常)的throwable(异常))
                 Throwable throwable = e.getCause();
-                if (throwable instanceof SignatureVerificationException) {
-                    // 该异常为JWT的AccessToken认证失败(Token或者密钥不正确)
-                    msg = "Token或者密钥不正确(" + throwable.getMessage() + ")";
-                } else if (throwable instanceof TokenExpiredException) {
+               if (throwable instanceof TokenExpiredException) {
                     // 该异常为JWT的AccessToken已过期，判断RefreshToken未过期就进行AccessToken刷新
                     if (this.refreshToken(request, response)) {
                         return true;
-                    } else {
-                        msg = "Token已过期(" + throwable.getMessage() + ")";
-                    }
-                } else {
-                    // 应用异常不为空
-                    if (throwable != null) {
-                        // 获取应用异常msg
-                        msg = throwable.getMessage();
                     }
                 }
-                /*
-                  错误两种处理方式
-                  1. 将非法请求转发到/401的Controller处理，抛出自定义无权访问异常被全局捕捉再返回Response信息
-                  2. 无需转发，直接返回Response信息
-                  一般使用第二种(更方便)
-                 */
-                // 直接返回Response信息
-                this.response401(response, msg);
-                return false;
+               log.error(ErrorCodeEnum.E101004.getText() + "\n" + e.getMessage());
+               throw new ShiroSpecialException(ErrorCodeEnum.E101004, ErrorCodeEnum.E101004.getText());
             }
         } else {
-            // 没有携带Token
-            HttpServletRequest httpServletRequest = WebUtils.toHttp(request);
-            // 获取当前请求类型
-            String httpMethod = httpServletRequest.getMethod();
-            // 获取当前请求URI
-            String requestURI = httpServletRequest.getRequestURI();
-            log.info("当前请求 {} Authorization属性(Token)为空 请求类型 {}", requestURI, httpMethod);
-            // mustLoginFlag = true 开启任何请求必须登录才可访问
-            Boolean mustLoginFlag = false;
-            if (mustLoginFlag) {
-                this.response401(response, "请先登录");
-                return false;
-            }
+            throw new ShiroSpecialException(ErrorCodeEnum.E101003, ErrorCodeEnum.E101003.getText());
         }
         return true;
     }
 
+
     /**
-     * 这里我们详细说明下为什么重写
-     * 可以对比父类方法，只是将executeLogin方法调用去除了
-     * 如果没有去除将会循环调用doGetAuthenticationInfo方法
+     * @methodName  onAccessDenied
+     * @description 登录通过验证权限（根据url验证）
+     * @param request
+     * @param response
+     * @author  lixueyun
+     * @Date  2019/7/2 10:58
+     * @return  boolean
      */
     @Override
     protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
-        this.sendChallenge(request, response);
-        return false;
+        Subject subject = getSubject(request,response);
+        String url = getPathWithinApplication(request);
+        log.info("当前用户正在访问的url:{}", url);
+        //委托realm类授权认证
+        boolean permitted = subject.isPermitted(url);
+        if (!permitted) {
+            throw new ShiroSpecialException(ErrorCodeEnum.E101005, ErrorCodeEnum.E101005.getText());
+        }
+        return permitted;
     }
 
     /**
@@ -197,20 +174,4 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
         return false;
     }
 
-    /**
-     * 无需转发，直接返回Response信息
-     */
-    private void response401(ServletResponse response, String msg) {
-        HttpServletResponse httpServletResponse = WebUtils.toHttp(response);
-        httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
-        httpServletResponse.setCharacterEncoding("UTF-8");
-        httpServletResponse.setContentType("application/json; charset=utf-8");
-        try (PrintWriter out = httpServletResponse.getWriter()) {
-            String data = JsonConvertUtil.objectToJson(new ResponseBean(HttpStatus.UNAUTHORIZED.value(), "无权访问(Unauthorized):" + msg, null));
-            out.append(data);
-        } catch (IOException e) {
-            log.error("直接返回Response信息出现IOException异常:" + e.getMessage());
-            throw new ShiroSpecialException("直接返回Response信息出现IOException异常:" + e.getMessage());
-        }
-    }
 }

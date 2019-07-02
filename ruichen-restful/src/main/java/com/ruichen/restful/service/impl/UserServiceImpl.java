@@ -1,7 +1,7 @@
 package com.ruichen.restful.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.ruichen.restful.common.service.BaseService;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruichen.restful.repository.mybatis.entity.UserEntity;
 import com.ruichen.restful.repository.mybatis.mapper.IUserMapper;
 import com.ruichen.restful.service.IUserService;
@@ -15,12 +15,12 @@ import org.springframework.stereotype.Service;
  * @version  V1.0
  */
 @Service
-public class UserServiceImpl extends BaseService<IUserMapper, UserEntity> implements IUserService {
+public class UserServiceImpl extends ServiceImpl<IUserMapper, UserEntity> implements IUserService {
 
     @Override
     public UserEntity getUserByAccount(String account) {
         QueryWrapper<UserEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("AVATAR", account);
+        wrapper.eq("ACCOUNT", account);
         UserEntity userEntity = this.getOne(wrapper);
         return userEntity;
     }

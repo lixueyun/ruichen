@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.ruichen.restful.common.constant.ShiroConstant;
+import com.ruichen.restful.common.enums.ErrorCodeEnum;
 import com.ruichen.restful.common.exception.ShiroSpecialException;
 import com.ruichen.restful.config.shiro.ShiroProperties;
 import lombok.extern.slf4j.Slf4j;
@@ -43,8 +44,8 @@ public class JwtUtil {
             DecodedJWT jwt = verifier.verify(token);
             return true;
         } catch (UnsupportedEncodingException e) {
-            log.error("JWTToken认证解密出现UnsupportedEncodingException异常:" + e.getMessage());
-            throw new ShiroSpecialException("JWTToken认证解密出现UnsupportedEncodingException异常:" + e.getMessage());
+            log.error(ErrorCodeEnum.E101006.getText() + "\n" + e.getMessage());
+            throw new ShiroSpecialException(ErrorCodeEnum.E101006, ErrorCodeEnum.E101006.getText());
         }
     }
 
@@ -63,8 +64,8 @@ public class JwtUtil {
             // 只能输出String类型，如果是其他类型返回null
             return jwt.getClaim(claim).asString();
         } catch (JWTDecodeException e) {
-            log.error("解密Token中的公共信息出现JWTDecodeException异常:" + e.getMessage());
-            throw new ShiroSpecialException("解密Token中的公共信息出现JWTDecodeException异常:" + e.getMessage());
+            log.error(ErrorCodeEnum.E101007.getText() + "\n" + e.getMessage());
+            throw new ShiroSpecialException(ErrorCodeEnum.E101007, ErrorCodeEnum.E101007.getText());
         }
     }
 
@@ -91,8 +92,8 @@ public class JwtUtil {
                     .withExpiresAt(date)
                     .sign(algorithm);
         } catch (UnsupportedEncodingException e) {
-            log.error("JWTToken加密出现UnsupportedEncodingException异常:" + e.getMessage());
-            throw new ShiroSpecialException("JWTToken加密出现UnsupportedEncodingException异常:" + e.getMessage());
+            log.error(ErrorCodeEnum.E101008.getText() + "\n" + e.getMessage());
+            throw new ShiroSpecialException(ErrorCodeEnum.E101008, ErrorCodeEnum.E101008.getText());
         }
     }
 }
