@@ -1,9 +1,12 @@
 package com.ruichen.restful.config.shiro.jwt;
 
 import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruichen.restful.common.constant.ShiroConstant;
 import com.ruichen.restful.common.enums.ErrorCodeEnum;
 import com.ruichen.restful.common.exception.ShiroSpecialException;
+import com.ruichen.restful.common.response.BaseResponse;
+import com.ruichen.restful.common.response.BaseResponseBuilder;
 import com.ruichen.restful.common.utils.JwtUtil;
 import com.ruichen.restful.config.shiro.ShiroProperties;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +21,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -61,14 +66,20 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
             } catch (Exception e) {
                 // 获取应用异常(该Cause是导致抛出此throwable(异常)的throwable(异常))
                 Throwable throwable = e.getCause();
-               if (throwable instanceof TokenExpiredException) {
+                if (throwable instanceof TokenExpiredException) {
                     // 该异常为JWT的AccessToken已过期，判断RefreshToken未过期就进行AccessToken刷新
                     if (this.refreshToken(request, response)) {
                         return true;
                     }
                 }
-               log.error(ErrorCodeEnum.E101004.getText() + "\n" + e.getMessage());
-               throw new ShiroSpecialException(ErrorCodeEnum.E101004, ErrorCodeEnum.E101004.getText());
+                if (throwable instanceof ShiroSpecialException) {
+                    ShiroSpecialException shiroSpecialException = (ShiroSpecialException) throwable;
+                    this.responseMessage(response, shiroSpecialException.getBaseEnum().getValue(), shiroSpecialException.getMessage());
+                    return false;
+                }
+                log.error(ErrorCodeEnum.E101004.getText() + "\n" + e.getMessage());
+                this.responseMessage(response, ErrorCodeEnum.E101004.getValue(), ErrorCodeEnum.E101004.getText());
+                return false;
             }
         } else {
             throw new ShiroSpecialException(ErrorCodeEnum.E101003, ErrorCodeEnum.E101003.getText());
@@ -174,4 +185,21 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
         return false;
     }
 
+    //返回信息 因为RestControllerAdvice捕获不到异常
+    //在Filter没有进入到Controller如果直接抛异常，Spring全局异常解析捕获不到
+    private void responseMessage(ServletResponse response, Object value, String msg) {
+        HttpServletResponse httpServletResponse = WebUtils.toHttp(response);
+        httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+        httpServletResponse.setCharacterEncoding("UTF-8");
+        httpServletResponse.setContentType("application/json; charset=utf-8");
+        try (PrintWriter out = httpServletResponse.getWriter()) {
+            BaseResponse dataResponse = new BaseResponseBuilder<>().fail(value, msg).build();
+            ObjectMapper objectMapper = new ObjectMapper();
+            String data = objectMapper.writeValueAsString(dataResponse);
+            out.append(data);
+        } catch (IOException e) {
+            log.error("直接返回Response信息出现IOException异常\n", e.getMessage());
+            throw new ShiroSpecialException(ErrorCodeEnum.E101000, ErrorCodeEnum.E101000.getText());
+        }
+    }
 }

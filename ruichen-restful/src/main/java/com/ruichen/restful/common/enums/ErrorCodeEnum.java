@@ -16,9 +16,6 @@ public enum  ErrorCodeEnum implements IBaseEnum{
     E101003("101003", "无权访问(Unauthorized):请先登录!"),
     E101004("101004", "无权访问(Unauthorized):token无效,请尝试重新登录!"),
     E101005("101005", "无权访问(Unauthorized):该接口无权访问,请联系管理员!"),
-    E101006("101006", "JWTToken认证解密出现UnsupportedEncodingException异常!"),
-    E101007("101007", "解密Token中的公共信息出现JWTDecodeException异常!"),
-    E101008("101008", "JWTToken加密出现UnsupportedEncodingException异常!"),
     E101009("101009", "参数验证异常!"),
     E101010("101010", "该账号已存在!"),
     E999999("999999", "占位!");

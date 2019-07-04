@@ -44,8 +44,8 @@ public class JwtUtil {
             DecodedJWT jwt = verifier.verify(token);
             return true;
         } catch (UnsupportedEncodingException e) {
-            log.error(ErrorCodeEnum.E101006.getText() + "\n" + e.getMessage());
-            throw new ShiroSpecialException(ErrorCodeEnum.E101006, ErrorCodeEnum.E101006.getText());
+            log.error("JWTToken认证解密出现UnsupportedEncodingException异常\n" + e.getMessage());
+            throw new ShiroSpecialException(ErrorCodeEnum.E101000, ErrorCodeEnum.E101000.getText());
         }
     }
 
@@ -64,8 +64,8 @@ public class JwtUtil {
             // 只能输出String类型，如果是其他类型返回null
             return jwt.getClaim(claim).asString();
         } catch (JWTDecodeException e) {
-            log.error(ErrorCodeEnum.E101007.getText() + "\n" + e.getMessage());
-            throw new ShiroSpecialException(ErrorCodeEnum.E101007, ErrorCodeEnum.E101007.getText());
+            log.error("解密Token中的公共信息出现JWTDecodeException异常\n" + e.getMessage());
+            throw new ShiroSpecialException(ErrorCodeEnum.E101004, ErrorCodeEnum.E101004.getText());
         }
     }
 
@@ -92,8 +92,8 @@ public class JwtUtil {
                     .withExpiresAt(date)
                     .sign(algorithm);
         } catch (UnsupportedEncodingException e) {
-            log.error(ErrorCodeEnum.E101008.getText() + "\n" + e.getMessage());
-            throw new ShiroSpecialException(ErrorCodeEnum.E101008, ErrorCodeEnum.E101008.getText());
+            log.error("JWTToken加密出现UnsupportedEncodingException异常\n" + e.getMessage());
+            throw new ShiroSpecialException(ErrorCodeEnum.E101000, ErrorCodeEnum.E101000.getText());
         }
     }
 }

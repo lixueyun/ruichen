@@ -1,5 +1,6 @@
 package com.ruichen.restful.shiro;
 
+import com.ruichen.restful.common.utils.Base64ConvertUtil;
 import org.springframework.util.Base64Utils;
 
 import java.io.UnsupportedEncodingException;
@@ -23,11 +24,24 @@ public class Base64Test {
      * @return  void
      */
     public static void main(String[] args) {
-        String keyStr = "ruichen";
+        String keyStr = "LiRuiChen&MaJingCun";
+        String keyStr1 = "LiXueYun&MaJingCun";
         byte[] keys;
         try {
             keys = keyStr.getBytes("UTF-8");
             System.out.println(Base64Utils.encodeToString(Arrays.copyOf(keys, 64)));
+
+            String decode = Base64ConvertUtil.decode("U0JBUElKV1RkV2FuZzkyNjQ1NA==");
+            System.out.println(decode);
+            String encode = Base64ConvertUtil.encode(keyStr);
+            System.out.println(encode);
+            String encode1 = Base64ConvertUtil.encode(keyStr1);
+            System.out.println(encode1);
+            String encode2 = Base64ConvertUtil.decode(encode);
+            System.out.println(encode2);
+            String encode3 = Base64ConvertUtil.decode(encode1);
+            System.out.println(encode3);
+
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

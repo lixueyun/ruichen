@@ -104,9 +104,9 @@ swagger:
 
 shiro:
   # AES密码加密私钥(Base64加密)
-  encryptAesKey: V2FuZzkyNjQ1NGRTQkFQSUpXVA==
+  encryptAesKey: TGlSdWlDaGVuJk1hSmluZ0N1bg==
   # JWT认证加密私钥(Base64加密)
-  encryptJwtKey: U0JBUElKV1RkV2FuZzkyNjQ1NA==
+  encryptJwtKey: TGlYdWVZdW4mTWFKaW5nQ3Vu
   # AccessToken过期时间-5分钟-5*60(秒为单位)
   accessTokenExpireTime: 300
   # RefreshToken过期时间-30分钟-30*60(秒为单位)

@@ -39,7 +39,8 @@ public class AesCipherUtil {
             // KeyGenerator 提供对称密钥生成器的功能，支持各种算法
             KeyGenerator keygen = KeyGenerator.getInstance("AES");
             // 将私钥encryptAESKey先Base64解密后转换为byte[]数组按128位初始化
-            SecureRandom secureRandom = SecureRandom.getInstance("RUICHEN");
+            //系统将确定环境中是否有所请求的算法实现，是否有多个，是否有首选实现。
+            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
             secureRandom.setSeed(Base64ConvertUtil.decode(ShiroProperties.ENCRYPT_AES_KEY).getBytes());
             keygen.init(128, secureRandom);
             // SecretKey 负责保存对称密钥 生成密钥
@@ -54,16 +55,16 @@ public class AesCipherUtil {
             // 先将二进制转换成16进制，再返回Base64加密后的String
             return Base64ConvertUtil.encode(HexConvertUtil.parseByte2HexStr(cipherByte));
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            log.error("getInstance()方法异常" + "\n" + e.getMessage());
+            log.error("getInstance()方法异常\n" + e.getMessage());
             throw new ShiroSpecialException(ErrorCodeEnum.E101000, ErrorCodeEnum.E101000.getText());
         } catch (UnsupportedEncodingException e) {
-            log.error("Base64加密异常" + "\n" + e.getMessage());
+            log.error("Base64加密异常\n" + e.getMessage());
             throw new ShiroSpecialException(ErrorCodeEnum.E101000, ErrorCodeEnum.E101000.getText());
         } catch (InvalidKeyException e) {
-            log.error("初始化Cipher对象异常" + "\n" + e.getMessage());
+            log.error("初始化Cipher对象异常\n" + e.getMessage());
             throw new ShiroSpecialException(ErrorCodeEnum.E101000, ErrorCodeEnum.E101000.getText());
         } catch (IllegalBlockSizeException | BadPaddingException e) {
-            log.error("加密异常，密钥有误" + "\n" + e.getMessage());
+            log.error("加密异常，密钥有误\n" + e.getMessage());
             throw new ShiroSpecialException(ErrorCodeEnum.E101000, ErrorCodeEnum.E101000.getText());
         }
     }
@@ -83,7 +84,8 @@ public class AesCipherUtil {
             // KeyGenerator 提供对称密钥生成器的功能，支持各种算法
             KeyGenerator keygen = KeyGenerator.getInstance("AES");
             // 将私钥encryptAESKey先Base64解密后转换为byte[]数组按128位初始化
-            SecureRandom secureRandom = SecureRandom.getInstance("RUICHEN");
+            //系统将确定环境中是否有所请求的算法实现，是否有多个，是否有首选实现。
+            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
             secureRandom.setSeed(Base64ConvertUtil.decode(ShiroProperties.ENCRYPT_AES_KEY).getBytes());
             keygen.init(128, secureRandom);
             // SecretKey 负责保存对称密钥 生成密钥
@@ -96,16 +98,16 @@ public class AesCipherUtil {
             byte[] cipherByte = c.doFinal(HexConvertUtil.parseHexStr2Byte(Base64ConvertUtil.decode(str)));
             return new String(cipherByte);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            log.error("getInstance()方法异常" + "\n" + e.getMessage());
+            log.error("getInstance()方法异常\n" + e.getMessage());
             throw new ShiroSpecialException(ErrorCodeEnum.E101000, ErrorCodeEnum.E101000.getText());
         } catch (UnsupportedEncodingException e) {
-            log.error("Base64解密异常" + "\n" + e.getMessage());
+            log.error("Base64解密异常\n" + e.getMessage());
             throw new ShiroSpecialException(ErrorCodeEnum.E101000, ErrorCodeEnum.E101000.getText());
         } catch (InvalidKeyException e) {
-            log.error("初始化Cipher对象异常" + "\n" + e.getMessage());
+            log.error("初始化Cipher对象异常\n" + e.getMessage());
             throw new ShiroSpecialException(ErrorCodeEnum.E101000, ErrorCodeEnum.E101000.getText());
         } catch (IllegalBlockSizeException | BadPaddingException e) {
-            log.error("解密异常，密钥有误" + "\n" + e.getMessage());
+            log.error("解密异常，密钥有误\n" + e.getMessage());
             throw new ShiroSpecialException(ErrorCodeEnum.E101000, ErrorCodeEnum.E101000.getText());
         }
     }
