@@ -2,6 +2,7 @@ package com.ruichen.restful.repository.mybatis.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.ruichen.restful.common.entity.BaseEntity;
 import com.ruichen.restful.common.enums.UserSexEnum;
 import com.ruichen.restful.common.enums.UserStatusEnum;
@@ -66,6 +67,7 @@ public class UserEntity extends BaseEntity<UserEntity> {
      * 性别
      */
     @TableField("SEX")
+    @JsonValue
     private UserSexEnum sex;
 
     /**
@@ -84,6 +86,7 @@ public class UserEntity extends BaseEntity<UserEntity> {
      * 状态
      */
     @TableField("STATUS")
+    @JsonValue
     private UserStatusEnum status;
 
 }

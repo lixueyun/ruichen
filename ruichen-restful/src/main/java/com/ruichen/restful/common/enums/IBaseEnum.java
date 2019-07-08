@@ -1,8 +1,10 @@
 package com.ruichen.restful.common.enums;
 
-public interface IBaseEnum {
+import com.baomidou.mybatisplus.core.enums.IEnum;
 
-    Object getValue();
+import java.io.Serializable;
+
+public interface IBaseEnum<T extends Serializable> extends IEnum<T> {
 
     String getText();
 }

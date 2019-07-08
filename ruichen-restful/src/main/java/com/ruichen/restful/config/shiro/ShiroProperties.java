@@ -2,6 +2,7 @@ package com.ruichen.restful.config.shiro;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,27 +42,27 @@ public class ShiroProperties {
     public static String SHIRO_CACHE_EXPIRE_TIME;
 
     @Value("${shiro.encryptAesKey}")
-    public static void setEncryptAesKey(String encryptAesKey) {
+    public void setEncryptAesKey(String encryptAesKey) {
         ENCRYPT_AES_KEY = encryptAesKey;
     }
 
     @Value("${shiro.encryptJwtKey}")
-    public static void setEncryptJwtKey(String encryptJwtKey) {
+    public void setEncryptJwtKey(String encryptJwtKey) {
         ENCRYPT_JWT_KEY = encryptJwtKey;
     }
 
-    @Value("${shiro.accessTokenexpireTime}")
-    public static void setAccessTokenexpireTime(String accessTokenexpireTime) {
-        ACCESS_TOKENEXPIRE_TIME = accessTokenexpireTime;
+    @Value("${shiro.accessTokenExpireTime}")
+    public void setAccessTokenexpireTime(String accessTokenExpireTime) {
+        ACCESS_TOKENEXPIRE_TIME = accessTokenExpireTime;
     }
 
     @Value("${shiro.refreshTokenExpireTime}")
-    public static void setRefreshTokenExpireTime(String refreshTokenExpireTime) {
+    public void setRefreshTokenExpireTime(String refreshTokenExpireTime) {
         REFRESH_TOKEN_EXPIRE_TIME = refreshTokenExpireTime;
     }
 
     @Value("${shiro.shiroCacheExpireTime}")
-    public static void setShiroCacheExpireTime(String shiroCacheExpireTime) {
+    public void setShiroCacheExpireTime(String shiroCacheExpireTime) {
         SHIRO_CACHE_EXPIRE_TIME = shiroCacheExpireTime;
     }
 }

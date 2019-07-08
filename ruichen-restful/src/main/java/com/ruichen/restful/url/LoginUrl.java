@@ -7,5 +7,5 @@ package com.ruichen.restful.url;
  */
 public class LoginUrl {
 
-    public static final String LOGIN = "login";
+    public static final String LOGIN = "/login";
 }
