@@ -1,11 +1,15 @@
 package com.ruichen.restful.config.shiro.cache;
 
+import com.ruichen.restful.common.constant.ShiroConstant;
+import com.ruichen.restful.common.utils.JwtUtil;
+import com.ruichen.restful.config.shiro.ShiroProperties;
 import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheException;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @ClassName  ShiroRedisCache
@@ -18,15 +22,21 @@ public class ShiroRedisCache<K, V>  implements Cache<K, V> {
 
     private RedisTemplate redisTemplate;
 
-    private String prefix;
 
     public ShiroRedisCache(RedisTemplate redisTemplate){
         this.redisTemplate = redisTemplate;
     }
 
-    public ShiroRedisCache(RedisTemplate redisTemplate, String prefix) {
-        this(redisTemplate);
-        this.prefix = prefix;
+    /**
+     * @methodName  getKey
+     * @description 缓存的key名称获取为shiro:cache:account
+     * @param key
+     * @author  lixueyun
+     * @Date  2019/7/8 14:36
+     * @return  java.lang.String
+     */
+    private String getKey(Object key) {
+        return ShiroConstant.PREFIX_SHIRO_CACHE + JwtUtil.getClaim(key.toString(), ShiroConstant.ACCOUNT);
     }
 
     @Override
@@ -34,7 +44,7 @@ public class ShiroRedisCache<K, V>  implements Cache<K, V> {
         if (k == null) {
             return null;
         }
-        return (V)redisTemplate.opsForValue().get(k);
+        return (V)redisTemplate.opsForValue().get(this.getKey(k));
     }
 
     @Override
@@ -42,7 +52,7 @@ public class ShiroRedisCache<K, V>  implements Cache<K, V> {
         if (k== null || v == null) {
             return null;
         }
-        redisTemplate.opsForValue().set(k, v);
+        redisTemplate.opsForValue().set(this.getKey(k), v, Long.valueOf(ShiroProperties.SHIRO_CACHE_EXPIRE_TIME), TimeUnit.SECONDS);
         return v;
     }
 
@@ -51,8 +61,8 @@ public class ShiroRedisCache<K, V>  implements Cache<K, V> {
         if(k==null){
             return null;
         }
-        V v = (V)redisTemplate.opsForValue().get(k);
-        redisTemplate.delete(k);
+        V v = (V)redisTemplate.opsForValue().get(this.getKey(k));
+        redisTemplate.delete(this.getKey(k));
         return v;
     }
 
@@ -68,7 +78,7 @@ public class ShiroRedisCache<K, V>  implements Cache<K, V> {
 
     @Override
     public Set<K> keys() {
-        Set<K> sets = redisTemplate.keys(this.prefix + ":");
+        Set<K> sets = redisTemplate.keys(ShiroConstant.PREFIX_SHIRO_CACHE + ":");
         return sets;
     }
 

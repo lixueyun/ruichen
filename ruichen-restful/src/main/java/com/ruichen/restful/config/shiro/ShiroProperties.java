@@ -29,17 +29,17 @@ public class ShiroProperties {
     /**
      * 过期时间
      */
-    public static String ACCESS_TOKENEXPIRE_TIME;
+    public static Long ACCESS_TOKENEXPIRE_TIME;
 
     /**
-     * RefreshToken过期时间-30分钟-30*60(秒为单位)
+     * RefreshToken过期时间-30天-30*24*60*60(秒为单位)
      */
-    public static String REFRESH_TOKEN_EXPIRE_TIME;
+    public static Long REFRESH_TOKEN_EXPIRE_TIME;
 
     /**
-     * Shiro缓存过期时间-5分钟-5*60(秒为单位)(一般设置与AccessToken过期时间一致)
+     * Shiro缓存过期时间-7天-7*24*60*60(秒为单位)(一般设置与AccessToken过期时间一致)
      */
-    public static String SHIRO_CACHE_EXPIRE_TIME;
+    public static Long SHIRO_CACHE_EXPIRE_TIME;
 
     @Value("${shiro.encryptAesKey}")
     public void setEncryptAesKey(String encryptAesKey) {
@@ -52,17 +52,17 @@ public class ShiroProperties {
     }
 
     @Value("${shiro.accessTokenExpireTime}")
-    public void setAccessTokenexpireTime(String accessTokenExpireTime) {
+    public void setAccessTokenexpireTime(Long accessTokenExpireTime) {
         ACCESS_TOKENEXPIRE_TIME = accessTokenExpireTime;
     }
 
     @Value("${shiro.refreshTokenExpireTime}")
-    public void setRefreshTokenExpireTime(String refreshTokenExpireTime) {
+    public void setRefreshTokenExpireTime(Long refreshTokenExpireTime) {
         REFRESH_TOKEN_EXPIRE_TIME = refreshTokenExpireTime;
     }
 
     @Value("${shiro.shiroCacheExpireTime}")
-    public void setShiroCacheExpireTime(String shiroCacheExpireTime) {
+    public void setShiroCacheExpireTime(Long shiroCacheExpireTime) {
         SHIRO_CACHE_EXPIRE_TIME = shiroCacheExpireTime;
     }
 }

@@ -11,6 +11,7 @@ import com.ruichen.restful.repository.mybatis.entity.RoleEntity;
 import com.ruichen.restful.repository.mybatis.entity.UserEntity;
 import com.ruichen.restful.service.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -80,17 +81,17 @@ public class UserRealm extends AuthorizingRealm {
         String account = JwtUtil.getClaim(token, ShiroConstant.ACCOUNT);
         // 帐号为空
         if (StringUtils.isEmpty(account)) {
-            throw new ShiroSpecialException(ErrorCodeEnum.E101004, ErrorCodeEnum.E101004.getText());
+            throw new AuthenticationException(ErrorCodeEnum.E101004.getText());
         }
         //获取用户信息
         UserEntity user = userService.getUserByAccount(account);
         // 账号不存在
         if (user == null) {
-            throw new ShiroSpecialException(ErrorCodeEnum.E101001, ErrorCodeEnum.E101001.getText());
+            throw new AuthenticationException(ErrorCodeEnum.E101001.getText());
         }
         // 账号被冻结
         if (!user.getStatus().equals(UserStatusEnum.ENABLE)) {
-            throw new ShiroSpecialException(ErrorCodeEnum.E101002, ErrorCodeEnum.E101002.getText());
+            throw new AuthenticationException(ErrorCodeEnum.E101002.getText());
         }
         // 开始认证，要AccessToken认证通过，且Redis中存在RefreshToken，且两个Token时间戳一致
         if (JwtUtil.verify(token) && redisTemplate.hasKey(ShiroConstant.PREFIX_SHIRO_REFRESH_TOKEN + account)) {
@@ -101,7 +102,7 @@ public class UserRealm extends AuthorizingRealm {
                 return new SimpleAuthenticationInfo(token, token, "userRealm");
             }
         }
-        throw new ShiroSpecialException(ErrorCodeEnum.E101004, ErrorCodeEnum.E101004.getText());
+        throw new AuthenticationException(ErrorCodeEnum.E101004.getText());
     }
 
     /**
@@ -122,11 +123,22 @@ public class UserRealm extends AuthorizingRealm {
         //获取用户角色id集合
         List<Long> rolesIds = userRoleService.getRolesByUserId(userEntity.getId());
 
+        //角色为空直接返回
+        if (CollectionUtils.isEmpty(rolesIds)) {
+            return simpleAuthorizationInfo;
+        }
+
         //获取角色详细信息
         List<RoleEntity> roleEntities = (List<RoleEntity>) roleService.listByIds(rolesIds);
 
         //获取资源id集合
         List<Long> permissionIds = rolePermissionService.getPermissionsByRoleIds(rolesIds);
+
+        //资源为空直接返回
+        if (CollectionUtils.isEmpty(permissionIds)) {
+            return simpleAuthorizationInfo;
+        }
+
         //获取资源详情
         List<PermissionEntity> permissionEntities = (List<PermissionEntity>) permissionService.listByIds(permissionIds);
 

@@ -1,16 +1,12 @@
 package com.ruichen.restful.config.shiro.jwt;
 
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruichen.restful.common.constant.ShiroConstant;
 import com.ruichen.restful.common.enums.ErrorCodeEnum;
 import com.ruichen.restful.common.exception.ShiroSpecialException;
-import com.ruichen.restful.common.response.BaseResponse;
-import com.ruichen.restful.common.response.BaseResponseBuilder;
 import com.ruichen.restful.common.utils.JwtUtil;
 import com.ruichen.restful.config.shiro.ShiroProperties;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
 import org.apache.shiro.web.util.WebUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,8 +17,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -74,15 +68,17 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
                 }
                 if (throwable instanceof ShiroSpecialException) {
                     ShiroSpecialException shiroSpecialException = (ShiroSpecialException) throwable;
-                    this.responseMessage(response, shiroSpecialException.getBaseEnum().getValue(), shiroSpecialException.getMessage());
+                    JwtUtil.responseMessage(response, shiroSpecialException.getBaseEnum().getValue(), shiroSpecialException.getMessage());
                     return false;
                 }
                 log.error(ErrorCodeEnum.E101004.getText() + "\n" + e.getMessage());
-                this.responseMessage(response, ErrorCodeEnum.E101004.getValue(), ErrorCodeEnum.E101004.getText());
+                JwtUtil.responseMessage(response, ErrorCodeEnum.E101004.getValue(), ErrorCodeEnum.E101004.getText());
                 return false;
             }
         } else {
-            throw new ShiroSpecialException(ErrorCodeEnum.E101003, ErrorCodeEnum.E101003.getText());
+            log.error(ErrorCodeEnum.E101003.getText() + "\n" + ErrorCodeEnum.E101003.getText());
+            JwtUtil.responseMessage(response, ErrorCodeEnum.E101003.getValue(), ErrorCodeEnum.E101003.getText());
+            return false;
         }
         return true;
     }
@@ -90,7 +86,8 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
 
     /**
      * @methodName  onAccessDenied
-     * @description 登录通过验证权限（根据url验证）
+     * @description 重写后什么都不处理
+     * 否则将会循环调用doGetAuthenticationInfo方法
      * @param request
      * @param response
      * @author  lixueyun
@@ -99,15 +96,7 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
      */
     @Override
     protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
-        Subject subject = getSubject(request,response);
-        String url = getPathWithinApplication(request);
-        log.info("当前用户正在访问的url:{}", url);
-        //委托realm类授权认证
-        boolean permitted = subject.isPermitted(url);
-        if (!permitted) {
-            throw new ShiroSpecialException(ErrorCodeEnum.E101005, ErrorCodeEnum.E101005.getText());
-        }
-        return permitted;
+        return false;
     }
 
     /**
@@ -168,7 +157,7 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
                 // 获取当前最新时间戳
                 String currentTimeMillis = String.valueOf(System.currentTimeMillis());
                 // 设置RefreshToken中的时间戳为当前最新时间戳，且刷新过期时间重新为30分钟过期(配置文件可配置refreshTokenExpireTime属性)
-                redisTemplate.opsForValue().set(ShiroConstant.PREFIX_SHIRO_REFRESH_TOKEN + account, currentTimeMillis, Integer.parseInt(ShiroProperties.REFRESH_TOKEN_EXPIRE_TIME), TimeUnit.SECONDS);
+                redisTemplate.opsForValue().set(ShiroConstant.PREFIX_SHIRO_REFRESH_TOKEN + account, currentTimeMillis, ShiroProperties.REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.SECONDS);
                 // 刷新AccessToken，设置时间戳为当前最新时间戳
                 token = JwtUtil.sign(account, currentTimeMillis);
                 // 将新刷新的AccessToken再次进行Shiro的登录
@@ -183,23 +172,5 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
             }
         }
         return false;
-    }
-
-    //返回信息 因为RestControllerAdvice捕获不到异常
-    //在Filter没有进入到Controller如果直接抛异常，Spring全局异常解析捕获不到
-    private void responseMessage(ServletResponse response, Object value, String msg) {
-        HttpServletResponse httpServletResponse = WebUtils.toHttp(response);
-        httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
-        httpServletResponse.setCharacterEncoding("UTF-8");
-        httpServletResponse.setContentType("application/json; charset=utf-8");
-        try (PrintWriter out = httpServletResponse.getWriter()) {
-            BaseResponse dataResponse = new BaseResponseBuilder<>().fail(value, msg).build();
-            ObjectMapper objectMapper = new ObjectMapper();
-            String data = objectMapper.writeValueAsString(dataResponse);
-            out.append(data);
-        } catch (IOException e) {
-            log.error("直接返回Response信息出现IOException异常\n", e.getMessage());
-            throw new ShiroSpecialException(ErrorCodeEnum.E101000, ErrorCodeEnum.E101000.getText());
-        }
     }
 }

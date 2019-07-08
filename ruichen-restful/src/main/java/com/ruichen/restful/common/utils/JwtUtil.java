@@ -5,13 +5,23 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruichen.restful.common.constant.ShiroConstant;
 import com.ruichen.restful.common.enums.ErrorCodeEnum;
 import com.ruichen.restful.common.exception.ShiroSpecialException;
+import com.ruichen.restful.common.response.BaseResponse;
+import com.ruichen.restful.common.response.BaseResponseBuilder;
 import com.ruichen.restful.config.shiro.ShiroProperties;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.web.util.WebUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
@@ -43,9 +53,9 @@ public class JwtUtil {
                     .build();
             DecodedJWT jwt = verifier.verify(token);
             return true;
-        } catch (UnsupportedEncodingException e) {
-            log.error("JWTToken认证解密出现UnsupportedEncodingException异常\n" + e.getMessage());
-            throw new ShiroSpecialException(ErrorCodeEnum.E101000, ErrorCodeEnum.E101000.getText());
+        } catch (Exception e) {
+            log.error("JWTToken认证解密出现异常\n" + e.getMessage());
+            throw new AuthenticationException(ErrorCodeEnum.E101004.getText());
         }
     }
 
@@ -83,7 +93,7 @@ public class JwtUtil {
             // 帐号加JWT私钥加密
             String secret = account + Base64ConvertUtil.decode(ShiroProperties.ENCRYPT_JWT_KEY);
             // 此处过期时间是以毫秒为单位，所以乘以1000
-            Date date = new Date(System.currentTimeMillis() + Long.parseLong(ShiroProperties.ACCESS_TOKENEXPIRE_TIME) * 1000);
+            Date date = new Date(System.currentTimeMillis() + ShiroProperties.ACCESS_TOKENEXPIRE_TIME * 1000);
             Algorithm algorithm = Algorithm.HMAC256(secret);
             // 附带account帐号信息
             return JWT.create()
@@ -93,6 +103,25 @@ public class JwtUtil {
                     .sign(algorithm);
         } catch (UnsupportedEncodingException e) {
             log.error("JWTToken加密出现UnsupportedEncodingException异常\n" + e.getMessage());
+            throw new ShiroSpecialException(ErrorCodeEnum.E101000, ErrorCodeEnum.E101000.getText());
+        }
+    }
+
+
+    //返回信息 因为RestControllerAdvice捕获不到异常
+    //在Filter没有进入到Controller如果直接抛异常，Spring全局异常解析捕获不到
+    public static void responseMessage(ServletResponse response, Object value, String msg) {
+        HttpServletResponse httpServletResponse = WebUtils.toHttp(response);
+        httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+        httpServletResponse.setCharacterEncoding("UTF-8");
+        httpServletResponse.setContentType("application/json; charset=utf-8");
+        try (PrintWriter out = httpServletResponse.getWriter()) {
+            BaseResponse dataResponse = new BaseResponseBuilder<>().fail(value, msg).build();
+            ObjectMapper objectMapper = new ObjectMapper();
+            String data = objectMapper.writeValueAsString(dataResponse);
+            out.append(data);
+        } catch (IOException e) {
+            log.error("直接返回Response信息出现IOException异常\n", e.getMessage());
             throw new ShiroSpecialException(ErrorCodeEnum.E101000, ErrorCodeEnum.E101000.getText());
         }
     }

@@ -84,6 +84,7 @@ public class ShiroConfig {
 		// 添加自己的过滤器取名为jwt
 		Map<String, Filter> filterMap = new LinkedHashMap<>();
 		filterMap.put("jwt", new JwtFilter(redisTemplate));
+		filterMap.put("resourceCheckFilter", new ResourceCheckFilter());
 		shiroFilterFactoryBean.setFilters(filterMap);
 
 		/*定义shiro过滤链  Map结构
@@ -103,7 +104,7 @@ public class ShiroConfig {
 	 	filterChainDefinitionMap.put("/doc.html", "anon");
 		//数据库监控
 		filterChainDefinitionMap.put("/druid/**", "anon");
-		filterChainDefinitionMap.put("/**", "jwt");
+		filterChainDefinitionMap.put("/**", "jwt,resourceCheckFilter");
 		shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
 		return shiroFilterFactoryBean;
 	}

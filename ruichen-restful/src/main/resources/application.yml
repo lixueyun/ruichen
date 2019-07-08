@@ -51,9 +51,9 @@ spring:
         #是否能够重置数据
         reset-enable: false
         #白名单
-#        allow: 36.110.36.1-255
+        #        allow: 36.110.36.1-255
         #IP黑名单 (存在共同时，deny优先于allow) : 如果满足deny的话提示:Sorry, you are not permitted to view this page.
-#        deny: 127.0.0.2
+      #        deny: 127.0.0.2
       web-stat-filter:
         #添加不需要忽略的格式信息
         exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
@@ -107,9 +107,9 @@ shiro:
   encryptAesKey: TGlSdWlDaGVuJk1hSmluZ0N1bg==
   # JWT认证加密私钥(Base64加密)
   encryptJwtKey: TGlYdWVZdW4mTWFKaW5nQ3Vu
-  # AccessToken过期时间-5分钟-5*60(秒为单位)
-  accessTokenExpireTime: 300
-  # RefreshToken过期时间-30分钟-30*60(秒为单位)
-  refreshTokenExpireTime: 1800
-  # Shiro缓存过期时间-5分钟-5*60(秒为单位)(一般设置与AccessToken过期时间一致)
-  shiroCacheExpireTime: 300
+  # AccessToken过期时间-7天-7*24*60*60(秒为单位)
+  accessTokenExpireTime: 604800
+  # RefreshToken过期时间-30天-30*24*60*60(秒为单位)
+  refreshTokenExpireTime: 2592000
+  # Shiro缓存过期时间-7天-7*24*60*60(秒为单位)(一般设置与AccessToken过期时间一致)
+  shiroCacheExpireTime: 604800

@@ -60,7 +60,7 @@ public class LoginController {
             }
             // 设置RefreshToken，时间戳为当前时间戳，直接设置即可(不用先删后设，会覆盖已有的RefreshToken)
             String currentTimeMillis = String.valueOf(System.currentTimeMillis());
-            redisTemplate.opsForValue().set(ShiroConstant.PREFIX_SHIRO_REFRESH_TOKEN + request.getAccount(), currentTimeMillis, Long.valueOf(ShiroProperties.REFRESH_TOKEN_EXPIRE_TIME), TimeUnit.SECONDS);
+            redisTemplate.opsForValue().set(ShiroConstant.PREFIX_SHIRO_REFRESH_TOKEN + request.getAccount(), currentTimeMillis, ShiroProperties.REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.SECONDS);
             // 从Header中Authorization返回AccessToken，时间戳为当前时间戳
             String token = JwtUtil.sign(request.getAccount(), currentTimeMillis);
             return new BaseResponseBuilder<String>().success().data(token).build();
