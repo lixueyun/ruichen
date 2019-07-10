@@ -1,7 +1,10 @@
 package com.ruichen.restful.config.shiro;
 
+import com.ruichen.restful.config.RequestContext;
 import com.ruichen.restful.config.shiro.cache.ShiroRedisCacheManager;
+import com.ruichen.restful.config.shiro.filter.ResourceCheckFilter;
 import com.ruichen.restful.config.shiro.jwt.JwtFilter;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.mgt.DefaultSessionStorageEvaluator;
 import org.apache.shiro.mgt.DefaultSubjectDAO;
 import org.apache.shiro.mgt.SecurityManager;
@@ -10,6 +13,7 @@ import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSource
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -17,6 +21,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 import javax.servlet.Filter;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,6 +33,7 @@ import java.util.Map;
  */
 @Configuration
 public class ShiroConfig {
+
 
 	/**
 	 * @methodName  securityManager
@@ -77,13 +83,14 @@ public class ShiroConfig {
 	 * @return  org.apache.shiro.spring.web.ShiroFilterFactoryBean
 	 */
 	@Bean(name = "shiroFilter")
-	public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager, RedisTemplate redisTemplate) {
+	@DependsOn({"redisTemplate", "requestContext", "filterMapConfig"})
+	public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager, RedisTemplate redisTemplate, RequestContext requestContext, FilterMapConfig filterMapConfig) {
 		ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
 		//Shiro的核心安全接口,这个属性是必须的
 		shiroFilterFactoryBean.setSecurityManager(securityManager);
 		// 添加自己的过滤器取名为jwt
 		Map<String, Filter> filterMap = new LinkedHashMap<>();
-		filterMap.put("jwt", new JwtFilter(redisTemplate));
+		filterMap.put("jwt", new JwtFilter(redisTemplate, requestContext));
 		filterMap.put("resourceCheckFilter", new ResourceCheckFilter());
 		shiroFilterFactoryBean.setFilters(filterMap);
 
@@ -95,15 +102,11 @@ public class ShiroConfig {
 		Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
          /* 过滤链定义，从上向下顺序执行，一般将 / ** 放在最为下边:这是一个坑呢，一不小心代码就不好使了;
           authc:所有url都必须认证通过才可以访问; anon:所有url都都可以匿名访问 */
-	 	filterChainDefinitionMap.put("/login", "anon");
-	 	//Swagger接口文档
-	 	filterChainDefinitionMap.put("/v2/api-docs", "anon");
-	 	filterChainDefinitionMap.put("/webjars/**", "anon");
-	 	filterChainDefinitionMap.put("/swagger-resources/**", "anon");
-	 	filterChainDefinitionMap.put("/swagger-ui.html", "anon");
-	 	filterChainDefinitionMap.put("/doc.html", "anon");
-		//数据库监控
-		filterChainDefinitionMap.put("/druid/**", "anon");
+		List<String> ignoreFilters = filterMapConfig.ignoreFilter();
+		if (CollectionUtils.isNotEmpty(ignoreFilters)) {
+			ignoreFilters.forEach(url -> filterChainDefinitionMap.put(url, "anon"));
+		}
+
 		filterChainDefinitionMap.put("/**", "jwt,resourceCheckFilter");
 		shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
 		return shiroFilterFactoryBean;

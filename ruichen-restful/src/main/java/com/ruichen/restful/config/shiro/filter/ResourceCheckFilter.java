@@ -1,4 +1,4 @@
-package com.ruichen.restful.config.shiro;
+package com.ruichen.restful.config.shiro.filter;
 
 import com.ruichen.restful.common.enums.ErrorCodeEnum;
 import com.ruichen.restful.common.exception.ShiroSpecialException;

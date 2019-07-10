@@ -1,6 +1,6 @@
 package com.ruichen.restful.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ruichen.restful.common.utils.MyObjectMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,10 +29,10 @@ public class RedisConfig {
      */
     @Bean
     @ConditionalOnMissingBean(name = "redisTemplate")
-    public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory jedisConnectionFactory, ObjectMapper objectMapper) {
+    public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory jedisConnectionFactory) {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer(new MyObjectMapper()));
         template.setConnectionFactory(jedisConnectionFactory);
         return template;
     }

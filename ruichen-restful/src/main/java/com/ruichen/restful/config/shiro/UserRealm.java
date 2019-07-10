@@ -3,7 +3,6 @@ package com.ruichen.restful.config.shiro;
 import com.ruichen.restful.common.constant.ShiroConstant;
 import com.ruichen.restful.common.enums.ErrorCodeEnum;
 import com.ruichen.restful.common.enums.UserStatusEnum;
-import com.ruichen.restful.common.exception.ShiroSpecialException;
 import com.ruichen.restful.common.utils.JwtUtil;
 import com.ruichen.restful.config.shiro.jwt.JwtToken;
 import com.ruichen.restful.repository.mybatis.entity.PermissionEntity;

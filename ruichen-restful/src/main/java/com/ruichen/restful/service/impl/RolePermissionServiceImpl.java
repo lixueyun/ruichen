@@ -31,7 +31,7 @@ public class RolePermissionServiceImpl extends ServiceImpl<IRolePermissionMapper
     public List<Long> getPermissionsByRoleIds(List<Long> roleIds) {
         QueryWrapper<RolePermissionEntity> wrapper = new QueryWrapper<>();
         wrapper.select("PERMISSION_ID");
-        wrapper.in("ROLE_ID");
+        wrapper.in("ROLE_ID", roleIds);
         List<RolePermissionEntity> list = this.list(wrapper);
         return list.stream().map(RolePermissionEntity::getPermissionId)
                 .collect(Collectors.toList());

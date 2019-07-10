@@ -61,6 +61,7 @@ public class RestExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public BaseResponse handleException(Exception ex) {
+        ex.printStackTrace();
         log.error("Exception: \n    errorCode:{} \n    errorMessage:{}", ErrorCodeEnum.E101000.getValue(), ex.getMessage());
         return new BaseResponseBuilder().fail(ErrorCodeEnum.E101000.getValue(), ErrorCodeEnum.E101000.getText()).build();
     }

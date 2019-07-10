@@ -5,6 +5,7 @@ import com.ruichen.restful.common.constant.ShiroConstant;
 import com.ruichen.restful.common.enums.ErrorCodeEnum;
 import com.ruichen.restful.common.exception.ShiroSpecialException;
 import com.ruichen.restful.common.utils.JwtUtil;
+import com.ruichen.restful.config.RequestContext;
 import com.ruichen.restful.config.shiro.ShiroProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
@@ -31,8 +32,11 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
 
     private RedisTemplate redisTemplate;
 
-    public JwtFilter(RedisTemplate redisTemplate) {
+    private RequestContext requestContext;
+
+    public JwtFilter(RedisTemplate redisTemplate, RequestContext requestContext) {
         this.redisTemplate = redisTemplate;
+        this.requestContext = requestContext;
     }
 
     /**
@@ -118,6 +122,8 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
         JwtToken token = new JwtToken(this.getAuthzHeader(request));
         // 提交给UserRealm进行认证，如果错误他会抛出异常并被捕获
         this.getSubject(request, response).login(token);
+        //用户信息赋值
+        requestContext.currentUser(token);
         // 如果没有抛出异常则代表登入成功，返回true
         return true;
     }
