@@ -19,8 +19,8 @@ public class RestfulApplicationTests {
     public void testRedisPipelined() {
         redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             for (int i = 0; i < 10; i++) {
-                String redisKey = "k_"  + i;
-                String redisValue = "v_"  + i;
+                String redisKey = "key_"  + i;
+                String redisValue = "value_"  + i;
                 connection.set(redisKey.getBytes(), redisValue.getBytes());
             }
             return null;
