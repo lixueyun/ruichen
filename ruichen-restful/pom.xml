@@ -20,7 +20,7 @@
         <spring.boot.mybatis.plus.version>3.1.0</spring.boot.mybatis.plus.version>
         <commons-lang3.version>3.8</commons-lang3.version>
         <jedis.version>2.9.0</jedis.version>
-        <swagger.version>2.9.2</swagger.version>
+        <swagger.version>2.10.0</swagger.version>
         <swagger-bootstrap-ui.version>1.9.4</swagger-bootstrap-ui.version>
         <shiro.version>1.4.0</shiro.version>
         <jwt.version>3.4.1</jwt.version>
